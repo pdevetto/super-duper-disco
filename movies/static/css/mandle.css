@@ -1,0 +1,46 @@
+/*!
+ * Start Bootstrap - 4 Col Portfolio (http://startbootstrap.com/)
+ * Copyright 2013-2016 Start Bootstrap
+ * Licensed under MIT (https://github.com/BlackrockDigital/startbootstrap/blob/gh-pages/LICENSE)
+ */
+
+body {
+    padding-top: 70px; /* Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of navigation changes. */
+
+}
+
+.portfolio-item {
+    margin-bottom: 25px;
+}
+
+footer {
+    margin: 50px 0;
+}
+
+body{
+   background: url(../img/bg-pattern.png),#7b4397;
+   background: url(../img/bg-pattern.png),-webkit-linear-gradient(to left,#7b4397,#dc2430);
+   background: url(../img/bg-pattern.png),linear-gradient(to left,#7b4397,#dc2430);
+   color: #fff;
+}
+
+@media (min-width: 1200px) {
+  .container {
+    width: 1170px;
+  }
+}
+
+
+a{
+   color: rgba(255,255,255,.7);
+}
+a:hover, a:active, a:focus{
+   color: #fff !important;
+   background-color: transparent !important;
+}
+.pagination > li > a,
+.pagination > li > a:hover,
+.pagination > li > a:active,
+.pagination > li > a:focus{
+   background-color: transparent;
+}
