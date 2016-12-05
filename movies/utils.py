@@ -1,5 +1,4 @@
 import os, sys
-from guessit import guessit
 
 def parse(path):
    for m_file in os.listdir(path):
@@ -10,9 +9,8 @@ def parse(path):
       else:
          filext = os.path.splitext(current)[1]
          if filext in [".mkv", ".avi"]:
-            yield [path, m_file]
-         else:
-            print filext
+             print path.encode("utf-8")
+             yield [path, m_file]
 
 # if __name__ == "__main__":
 #    #open_browser()
