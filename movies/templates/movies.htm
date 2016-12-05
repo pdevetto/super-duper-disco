@@ -10,8 +10,11 @@
                      onerror="this.src = '{% static "img/logo/mandle-white.svg" %}';this.className += ' default'">
               </a>
               <div class="details">
-                 <span class='title'>{{ movie.title }}</span><br>
-                 <span class='title'>{{ movie.filename }}</span><br>
+                 {% if movie.title %}
+                    <span class='title'>{{ movie.title }}</span><br>
+                 {% else %}
+                    <span class='title'>{{ movie.filename }}</span><br>
+                 {% endif %}
                  <span class='real'>Reals</span><br>
                  <span class='year'><a href=''>({{ movie.year }})</a></span>
               </div>

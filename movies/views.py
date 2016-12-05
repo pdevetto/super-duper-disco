@@ -29,11 +29,31 @@ def process(request):
    proc = movies.process()
    processed = 0
    for movie in movies_list:
+      if movie.tmdb_id != None and movie.tmdb_id != 0:
+          continue
       if processed == 20:
           break
       processed += 1
       response += "<hr>" + movie.filename + ":"
       dat = proc.find(movie.filename)
+      Movie.objects.filter(pk=movie.id)
+      print "****" * 30
+      print "UPDATE"
+      try:
+          Movie.objects.filter(pk=movie.id).update(poster=dat['poster_path'],
+            title=dat['title'],
+            year=dat['release_date'][0:4],
+            tmdb_id=dat['id'])
+      except TypeError:
+          print movie.filename
+          pass
+
+      # Add 'genre_ids'
+      # Add reals :
+      # Add 'original_title'
+      # Add 'vote_average'
+      # Add 'original_language'
+      # Add the movie db 'id': 19898,
       response += "<br>" + str(dat)
    return HttpResponse(response)
 
