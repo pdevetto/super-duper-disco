@@ -12,12 +12,16 @@ class Director(models.Model):
 @python_2_unicode_compatible
 class Movie(models.Model):
    title      = models.CharField(max_length=200, blank=True)
-   title_hash = models.CharField(max_length=200, blank=True)
+   titlehash  = models.CharField(max_length=200)
+
    filename   = models.CharField(max_length=200, blank=True)
-   year       = models.DateTimeField('Movie year')
-   director   = models.ForeignKey(Director, on_delete=models.CASCADE)
+   filepath   = models.CharField(max_length=255, blank=True)
+
+   poster     = models.CharField(max_length=200, blank=True)
+   year       = models.DateTimeField('Movie year', null=True)
+   director   = models.ForeignKey(Director, on_delete=models.CASCADE, null=True)
 
    def __str__(self):
-      return self.year + str() + self.title
+      return str(self.year) + ")- "+ self.title + " / " + self.titlehash
    def custom_meth(self):
       return "Voila"

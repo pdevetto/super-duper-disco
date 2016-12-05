@@ -6,30 +6,37 @@
 
 body {
     padding-top: 70px; /* Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of navigation changes. */
-
+    font-family: "Lucida Console", Monaco, monospace !important;
 }
-
-.portfolio-item {
-    margin-bottom: 25px;
-}
-
 footer {
     margin: 50px 0;
 }
-
-body{
-   background: url(../img/bg-pattern.png),#7b4397;
-   background: url(../img/bg-pattern.png),-webkit-linear-gradient(to left,#7b4397,#dc2430);
-   background: url(../img/bg-pattern.png),linear-gradient(to left,#7b4397,#dc2430);
+body, #navbar{
+   background: url(../img/design/bg-pattern.png),#7b4397;
+   background: url(../img/design/bg-pattern.png),-webkit-linear-gradient(to left,#7b4397,#dc2430);
+   background: url(../img/design/bg-pattern.png),linear-gradient(to left,#7b4397,#dc2430);
    color: #fff;
+}
+#navbar{
+    box-shadow: 0 8px 6px -6px #333;
 }
 
 @media (min-width: 1200px) {
   .container {
-    width: 1170px;
+    width: 100%;
+    padding-left: 100px;
+    padding-right: 100px;
   }
 }
+h1 img{
+   width: 0.8em;
+   margin-right: 15px;
+}
 
+
+/****************
+ *   Text and links
+ *****************/
 
 a{
    color: rgba(255,255,255,.7);
@@ -44,3 +51,34 @@ a:hover, a:active, a:focus{
 .pagination > li > a:focus{
    background-color: transparent;
 }
+
+/***********************
+ *  Movies
+ ****************************/
+
+ .movie{
+    max-width: 200px;
+    display: inline-block;
+    vertical-align: top;
+    word-wrap: break-word;
+ }
+.movie .details{
+    padding: 0 10px 10px 10px;
+}
+.movie img{
+    width: 200px;
+    height:284px;
+}
+.movie img.default{
+   padding: 70px;
+   text-align: center;
+   vertical-align: middle;
+   border-radius: 20px;
+   border: 4px solid white;
+}
+.movie span{
+
+ }
+ .movie span.real{
+
+ }

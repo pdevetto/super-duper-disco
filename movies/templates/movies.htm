@@ -1,18 +1,20 @@
 {% extends 'base.htm' %}
-
+{% load static %}
 {% block content %}
    {% if movies_list %}
    <div class="row">
        {% for movie in movies_list %}
-          <div class="col-md-3 portfolio-item movie" id="{{ movie.movie_id }}" style="border:1px solid black">
-              <a href="#">
-                  <img class="img-responsive" src="http://placehold.it/750x450" alt="">
+          <div class="movie" id="{{ movie.movie_id }}" style="border:1px solid black">
+              <a href="movie/{{ movie.movie_id }}/">
+                  <img src="https://image.tmdb.org/t/p/original/{{ movie.poster }}" alt="no"
+                     onerror="this.src = '{% static "img/logo/mandle-white.svg" %}';this.className += ' default'">
               </a>
-              <a href="movie/{{ movie.movie_id }}/"><img src=''/></a><br>
-              <span class='title'>{{ movie.title }}</span><br>
-              <span class='title'>{{ movie.filename }}</span><br>
-              <span class='real'>Reals</span><br>
-              <span class='year'><a href=''>({{ movie.year }})</a></span>
+              <div class="details">
+                 <span class='title'>{{ movie.title }}</span><br>
+                 <span class='title'>{{ movie.filename }}</span><br>
+                 <span class='real'>Reals</span><br>
+                 <span class='year'><a href=''>({{ movie.year }})</a></span>
+              </div>
           </div>
        {% endfor %}
    </div>
