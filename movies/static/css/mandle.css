@@ -21,6 +21,20 @@ body, #navbar{
     box-shadow: 0 8px 6px -6px #333;
 }
 
+@media (min-width: 768px) {
+  .container {
+    width: 100%;
+    padding-left: 50px;
+    padding-right: 50px;
+  }
+}
+@media (min-width: 992px) {
+  .container {
+    width: 100%;
+    padding-left: 70px;
+    padding-right: 70px;
+  }
+}
 @media (min-width: 1200px) {
   .container {
     width: 100%;
@@ -28,6 +42,7 @@ body, #navbar{
     padding-right: 100px;
   }
 }
+
 h1 img{
    width: 0.8em;
    margin-right: 15px;
@@ -53,6 +68,18 @@ a:hover, a:active, a:focus{
 }
 
 /***********************
+ *  Notifications
+ ****************************/
+
+#notifications{
+   position: absolute;
+   top: 60px;
+   right:10px;
+   width:250px;
+   font-size:0.8em;
+   -webkit-filter:  opacity(90%);
+}
+/***********************
  *  Movies
  ****************************/
 
@@ -65,9 +92,11 @@ a:hover, a:active, a:focus{
 .movie .details{
     padding: 0 10px 10px 10px;
 }
+
 .movie img{
     width: 200px;
     height:284px;
+    -webkit-filter: brightness(80%) sepia(60%);
 }
 .movie img.default{
    padding: 70px;
@@ -76,9 +105,9 @@ a:hover, a:active, a:focus{
    border-radius: 20px;
    border: 4px solid white;
 }
-.movie span{
-
- }
- .movie span.real{
-
- }
+.movie .details .title{
+    font-size:1.1em;
+    font-weight:600;
+}
+.movie .details hr{
+}

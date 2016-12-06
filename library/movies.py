@@ -14,6 +14,13 @@ class moviedbapi:
       r = requests.get(url, params=params, headers=headers)
       return r.json()
 
+   def peoples(self, movie_id):
+      url = "https://api.themoviedb.org/3/movie/" + str(movie_id) + "/credits"
+      params = {'api_key':self.key, 'language' : 'fr'}
+      headers = { 'Accept': 'application/json' }
+      r = requests.get(url, params=params, headers=headers)
+      return r.json()
+
 class meanwords:
    def __init__(self):
       basepath = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -89,32 +96,18 @@ class process:
          return data["results"][0]
       # Got more result and got a date
       elif data["total_results"] >= 1 and year is not None:
-         print " "
-         print "_"*16
-         print "Year of the film" + str(year)
          results = [result for result in data["results"] if result["release_date"][0:4] == year]
-         print [r["title"] for r in results]
-         print "_" * 16
-         print " "
-         sys.exit()
          pass
       # Des results mais pas de year
       elif data["total_results"] >= 1:
-         print " "
-         print "_"*16
-         print [(result["title"]) for result in data["results"]]
          #compute levenshtein
-         print "_"*16
-         print " "
-
+         pass
          #sys.exit()
       # 0 results but a year in the title
       elif year is not None:
-         print "Year of the film" + str(year)
          filena = filename.split(year)
          for bits in filena:
             data = self.moviedb.call(bits)
-            print data
             # Got 1 result
             if data["total_results"] == 1:
                return data["results"][0]
@@ -126,39 +119,52 @@ class process:
                pass
          pass
       else:
-         # weight = {}
-         # for word in self.clean(filename).split(" "):
-         #    w = self.mean.get(word)
-         #    if w is not None:
-         #       weight[word] = w
-         #    else:
-         #       data = moviedb.call(word)
-         #       print " "
-         #       print "*"*25
-         #       print word
-         #       print "-"*25
-         #       print [(result["title"]) for result in data["results"]]
-         #       print "*"*25
-         #       print " "
-         #       self.mean.add(word, data["total_results"])
-         #       weight[word] = data["total_results"]
-         # print weight
-
          # Combinaison 2 words
          pass
+   def real(self, movie_id):
+      #print "REAL" + str(movie_id)
+      dat = self.moviedb.peoples(movie_id)
+      peoples = []
+      for cast in dat["cast"]:
+         peoples.append({ "name" : cast["name"], "tmdb_id" : cast["id"], "profile" : cast["profile_path"], "role" : 1, "cast_id": cast["cast_id"]})
+         #print cast
+      for cast in dat["crew"]:
+         roles = {
+            "Directing":0,
+            "Director":0,
+            "Producer":2,
+            "Executive Producer":2,
+            "Screenplay":3,
+            "Adaptation":3,
+            "Director of Photography":4,
+            "Writing":5,
+            "Writer":5,
+         }
+         try:
+            #print cast
+            role = roles[cast["job"]]
+            if role != -1:
+               peoples.append( { "name" : cast["name"], "tmdb_id" : cast["id"], "profile" : cast["profile_path"], "role" : role, "cast_id": cast["credit_id"]} )
+         except KeyError:
+            pass
+            #print "NEW LABEL : " + cast["job"]
 
+      return peoples
 
 if __name__ == "__main__":
-   files =  ["Mais.Qui.A.Tue.Pamela.Rose.avi",
-            #"Love (2015) 720p VOST by Solon8 [MKV Corp].mkv",
-            "Zach.Braff_2004_Garden.state.mkv",
-            "Mais.qui.a.re-tue.Pamela.Rose.avi",
-            "Colombiana (2011) 720p VO-VF by 4LT [MKV Corp].mkv",
-            "La Colline aux coquelicots.avi",
-            "Takeshi.Kitano_1989_Violent.Cop.mkv",
-            "Bernard et Bianca au Pays dSes kangourous) (1990) 720p VO-VF by l'@rtiste [MKV Corp].mkv",
-            "Blood Simple 1984 [Director's Cut].1984.DVDRip.XviD-VLiS.avi",
-            "Dope (2015) 720p VOST by 4LT [MKV Corp].mkv"]
-   m = moviedb()
-   for i in files:
-      m.find(i)
+   # files =  ["Mais.Qui.A.Tue.Pamela.Rose.avi",
+   #          #"Love (2015) 720p VOST by Solon8 [MKV Corp].mkv",
+   #          "Zach.Braff_2004_Garden.state.mkv",
+   #          "Mais.qui.a.re-tue.Pamela.Rose.avi",
+   #          "Colombiana (2011) 720p VO-VF by 4LT [MKV Corp].mkv",
+   #          "La Colline aux coquelicots.avi",
+   #          "Takeshi.Kitano_1989_Violent.Cop.mkv",
+   #          "Bernard et Bianca au Pays dSes kangourous) (1990) 720p VO-VF by l'@rtiste [MKV Corp].mkv",
+   #          "Blood Simple 1984 [Director's Cut].1984.DVDRip.XviD-VLiS.avi",
+   #          "Dope (2015) 720p VOST by 4LT [MKV Corp].mkv"]
+   m = process()
+   # for i in files:
+   #    m.find(i)
+   movieids = [292431, 12622, 308639, 62835, 401, 139374]
+   for i in movieids:
+       m.real(i)

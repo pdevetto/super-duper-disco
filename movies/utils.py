@@ -1,15 +1,17 @@
 import os, sys
 
-def parse(path):
+def parse(path, n=0):
+   print (n * " ") + "********* parse " + path
    for m_file in os.listdir(path):
       current = os.path.join(path, m_file)
       if not os.path.isfile(current):
-         for sample in parse(current):
+         print "is not file" + current
+         for sample in parse(current, n+1):
             yield sample
       else:
          filext = os.path.splitext(current)[1]
          if filext in [".mkv", ".avi"]:
-             print path.encode("utf-8")
+             print m_file
              yield [path, m_file]
 
 # if __name__ == "__main__":
