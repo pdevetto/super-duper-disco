@@ -82,7 +82,13 @@ def process(request):
          dat = proc.find(movie.filename)
          Movie.objects.filter(pk=movie.id)
          try:
-             Movie.objects.filter(pk=movie.id).update(poster=dat['poster_path'], title=dat['title'], year=dat['release_date'][0:4], tmdb_id=dat['id'])
+            print dat['release_date']
+            yeardate = dat['release_date']
+            year = yeardate[0:4]
+         except :
+            year = "0000"
+         try:
+             Movie.objects.filter(pk=movie.id).update(poster=dat['poster_path'], title=dat['title'], year=year, tmdb_id=dat['id'])
              response["nb"] += 1
          except TypeError:
              pass
