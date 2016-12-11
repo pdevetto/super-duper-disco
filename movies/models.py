@@ -27,6 +27,15 @@ class People(models.Model):
       return self.name
 
 @python_2_unicode_compatible
+class Genre(models.Model):
+   name     = models.CharField(max_length=200)
+   tmdb_id  = models.IntegerField(blank=True)
+
+   def __str__(self):
+      return self.name
+
+
+@python_2_unicode_compatible
 class Movie(models.Model):
    title      = models.CharField(max_length=200, blank=True)
    titlehash  = models.CharField(max_length=200)
@@ -37,6 +46,9 @@ class Movie(models.Model):
    poster     = models.CharField(max_length=200, null=True)
    year       = models.IntegerField(null=True)
    tmdb_id    = models.IntegerField(null=True)
+   clean      = models.IntegerField(null=True, default=0)
+
+   genres     = models.ManyToManyField(Genre)
 
    def __str__(self):
       return self.title

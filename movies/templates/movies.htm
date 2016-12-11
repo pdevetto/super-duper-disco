@@ -33,6 +33,9 @@
                      <a href="{% url 'director' real.id %}">{{ real }}</a><br>
                  {% endfor %}
 
+                 {% for genre in movie.genres.all %}
+                     <a href="{% url 'genre' genre.id %}">{{ genre }}</a><br>
+                 {% endfor %}
 
               </div>
           </div>

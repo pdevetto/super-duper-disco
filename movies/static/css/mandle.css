@@ -93,10 +93,10 @@ a:hover, a:active, a:focus{
     padding: 0 10px 10px 10px;
 }
 
-.movie img{
+.poster img{
     width: 200px;
     height:284px;
-    -webkit-filter: brightness(80%) sepia(60%);
+    -webkit-filter: brightness(90%) sepia(40%);
 }
 .movie img.default{
    padding: 70px;
@@ -110,4 +110,7 @@ a:hover, a:active, a:focus{
     font-weight:600;
 }
 .movie .details hr{
+}
+.movie .alldetails{
+  width: 100%;
 }

@@ -14,6 +14,14 @@ class moviedbapi:
       r = requests.get(url, params=params, headers=headers)
       return r.json()
 
+   def movie(self, movie_id):
+      url = "https://api.themoviedb.org/3/movie/" + str(movie_id) + ""
+      params = {'api_key':self.key, 'language' : 'fr'}
+      headers = { 'Accept': 'application/json' }
+      r = requests.get(url, params=params, headers=headers)
+      return r.json()
+
+
    def peoples(self, movie_id):
       url = "https://api.themoviedb.org/3/movie/" + str(movie_id) + "/credits"
       params = {'api_key':self.key, 'language' : 'fr'}
@@ -86,6 +94,10 @@ class process:
       years = re.findall("(?:[^0-9]|^)((?:19|20)[0-9][0-9])(?:[^0-9]|$)", filename)
       if len(years) == 1:
          return years[0]
+
+   def genre(self, movie_id):
+       dat = self.moviedb.movie(movie_id)
+       return dat["genres"]
 
    def find(self, filenameext):
       filename = self.clean(filenameext)
@@ -167,4 +179,4 @@ if __name__ == "__main__":
    #    m.find(i)
    movieids = [292431, 12622, 308639, 62835, 401, 139374]
    for i in movieids:
-       m.real(i)
+       m.genre(i)

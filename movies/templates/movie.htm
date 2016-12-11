@@ -1,0 +1,41 @@
+{% extends 'base.htm' %}
+{% load static %}
+{% block content %}
+   <div class="row">
+       <div class="col-lg-12">
+           <h1 class="page-header"><img src="{% static 'img/logo/mandle-white.svg' %}"/>Mandle 2
+          <small>({{ total }} full data)</small>
+          </h1>
+       </div>
+   </div>
+
+   <div class="row">
+        <div class="col-xs-3 col-lg-3" id="{{ movie.id }}">
+            <a class="poster" href="{% url 'movie' movie.id %}">
+                <img src="https://image.tmdb.org/t/p/original/{{ movie.poster }}" alt="no"
+                   onerror="this.src = '{% static "img/logo/mandle-white.svg" %}';this.className += ' default'">
+            </a>
+        </div>
+        <div class="col-xs-9 col-lg-9">
+           {% if movie.title %}
+              <h2>{{ movie.title }}</h2>
+           {% endif %}
+            <span class=''>{{ movie.filename }}</span>
+
+           {% if movie.year != None %}
+              <br> ----- <span class='year'><a href="{% url 'year' movie.year %}">({{ movie.year }})</a></span> ----- <br>
+           {% else %}
+               <br> ---------- <br>
+           {% endif %}
+
+           {% for people in peoples %}
+               {{ people.role }} = <a href="{% url 'director' people.id %}">{{ people }}</a><br>
+           {% endfor %}
+
+           {% for genre in movie.genres.all %}
+               <a href="{% url 'genre' genre.id %}">{{ genre }}</a><br>
+           {% endfor %}
+
+        </div>
+   </div>
+{% endblock %}
