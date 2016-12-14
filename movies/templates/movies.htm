@@ -9,6 +9,12 @@
        </div>
    </div>
 
+   {% if findtype == "people" %}
+      <h2> {{ people }} </h2>
+      <img src="https://image.tmdb.org/t/p/original{{ people.profile }}" alt="no" style="width:120px"
+         onerror="this.src = '{% static "img/logo/mandle-white.svg" %}';this.className += ' default'">
+      <hr>
+   {% endif %}
    {% if movies_list %}
    <div class="row">
        {% for movie, reals in movies_list %}
@@ -30,7 +36,7 @@
                  {% endif %}
 
                  {% for real in reals %}
-                     <a href="{% url 'director' real.id %}">{{ real }}</a><br>
+                     <a href="{% url 'people' real.id %}">{{ real }}</a><br>
                  {% endfor %}
 
                  {% for genre in movie.genres.all %}

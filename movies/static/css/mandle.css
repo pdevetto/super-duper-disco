@@ -13,8 +13,9 @@ footer {
 }
 body, #navbar{
    background: url(../img/design/bg-pattern.png),#7b4397;
-   background: url(../img/design/bg-pattern.png),-webkit-linear-gradient(to left,#7b4397,#dc2430);
-   background: url(../img/design/bg-pattern.png),linear-gradient(to left,#7b4397,#dc2430);
+   /*background: url(../img/design/bg-pattern.png),-webkit-linear-gradient(to left,#7b4397,#dc2430);
+   background: url(../img/design/bg-pattern.png),linear-gradient(to left,#7b4397,#dc2430);*/
+   background: url(../img/design/bg-pattern.png),black;
    color: #fff;
 }
 #navbar{

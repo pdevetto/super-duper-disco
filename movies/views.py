@@ -83,7 +83,7 @@ def process(request):
    response["nb"] = 0
    movies_list = Movie.objects.filter(clean=0)
    for movie in movies_list:
-      if response["nb"] >= 5:
+      if response["nb"] >= 2:
           break
       #################
       # For each movies
@@ -95,7 +95,6 @@ def process(request):
          if movie.genres.count() == 0:
             response["log"] += "<br>" + movie.filename + "<br> -- genres:"
             dat = proc.genre(movie.tmdb_id)
-            print dat
             for g in dat:
                 response["log"] += ": " + str(g)
                 if Genre.objects.filter(tmdb_id=g["id"]).count() == 0:
@@ -131,12 +130,10 @@ def process(request):
       ################################
       # That does not exist
       else:
-         print movie.filename.encode("utf-8")
          response["log"] += "<br>" + movie.filename + "<br> -- basic:"
          dat = proc.find(movie.filename)
          #Movie.objects.filter(pk=movie.id)
          try:
-            print dat['release_date']
             year = int(dat['release_date'][0:4])
          except :
             year = 0
@@ -154,8 +151,8 @@ def process(request):
 
    end = time.time()
    response["time"] = end - start
-   #return JsonResponse(response)
-   return HttpResponse(response["log"])
+   return JsonResponse(response)
+   #return HttpResponse(response["log"])
 
 def update(request):
    start = time.time()
@@ -181,23 +178,30 @@ def update(request):
    response["time"] = end - start
    return JsonResponse(response)
 
-def find(request, year=None, director=None, movie=None, genre=None):
+def find(request, year=None, people=None, movie=None, genre=None):
     if movie != None:
         movie = Movie.objects.filter(id=movie)[0]
-        peoples = People.objects.filter(role__movie__id = movie.id)
-        context = {'movie': movie, 'peoples' :peoples}
-        return render(request, 'movie.htm', context)
+        peoples = Role.objects.filter(movie__id = movie.id)
+        displays = [people.get_role_display() for people in peoples]
+        context = {'movie': movie, 'peoples' :peoples, 'displays' : list(set(displays))}
 
+        return render(request, 'movie.htm', context)
+    context = {}
     if year != None:
-        movies = Movie.objects.filter(year=year)
-    if director != None:
-        movies = Movie.objects.filter(role__people__id=director, role__role = 0)
+        movies = Movie.objects.filter(year=year).distinct()
+        context["findtype"] = "year"
+    if people != None:
+        movies = Movie.objects.filter(role__people__id=people).distinct()
+        context["findtype"] = "people"
+        context["people"] = People.objects.get(id=people)
     if genre != None:
-        movies = Movie.objects.filter(genres__id=genre)
+        movies = Movie.objects.filter(genres__id=genre).distinct()
+        context["findtype"] = "genre"
 
     movies_list = []
     for movie in movies:
         reals = People.objects.filter(role__movie__id = movie.id, role__role = 0)
         movies_list.append( (movie, reals) )
-    context = {'movies_list': movies_list,}
+    context["movies_list"] = movies_list
+
     return render(request, 'movies.htm', context)

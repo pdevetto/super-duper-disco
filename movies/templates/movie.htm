@@ -28,12 +28,18 @@
                <br> ---------- <br>
            {% endif %}
 
-           {% for people in peoples %}
-               {{ people.role }} = <a href="{% url 'director' people.id %}">{{ people }}</a><br>
-           {% endfor %}
-
+           Genres:
            {% for genre in movie.genres.all %}
                <a href="{% url 'genre' genre.id %}">{{ genre }}</a><br>
+           {% endfor %}
+
+           {% for display in displays %}
+              <h3> {{ display }} </h3>
+              {% for people in peoples %}
+                 {% if people.get_role_display == display %}
+                    <a href="{% url 'people' people.people.id %}">{{ people.people }}</a><br>
+                 {% endif %}
+              {% endfor %}
            {% endfor %}
 
         </div>

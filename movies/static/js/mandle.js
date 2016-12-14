@@ -1,9 +1,11 @@
 mandle= {
    data:{
       updateurl:"http://127.0.0.1:8000/update",
-      processurl:"http://127.0.0.1:8000/process"
+      processurl:"http://127.0.0.1:8000/process",
+      query:""
    },
    init:function(){
+      mandle.data.query = window.location.href.toString().split(window.location.host)[1];
       mandle.notification.init();
       mandle.moviebase.init();
    },
@@ -24,7 +26,11 @@ mandle= {
    },
    moviebase:{
       init:function(){
-         mandle.moviebase.update()
+         if(mandle.data.query.length <= 1){
+            mandle.moviebase.update()
+         }else{
+            "No update cause long"
+         }
       },
       update:function(){
          var req = new XMLHttpRequest()
@@ -52,8 +58,8 @@ mandle= {
          req.send();
       },
       process:function(){
-         text = "<strong>Process:</strong>"
-         mandle.notification.addNotif("2",text)
+         //text = "<strong>Process:</strong>"
+         //mandle.notification.addNotif("2",text)
          var req = new XMLHttpRequest()
          req.open('GET', mandle.data.processurl);
          req.onreadystatechange = function () {
@@ -65,7 +71,7 @@ mandle= {
                   mandle.notification.addNotif("1",text)
 
                   if(dat["nb"] != 0){
-                     setTimeout(mandle.moviebase.process, 500);
+                     mandle.moviebase.process()
                   }
                } else {
                   text = "<strong>Process:</strong> Error"

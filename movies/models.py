@@ -63,4 +63,4 @@ class Role(models.Model):
    tmdb_id  = models.CharField(max_length=200)
 
    def __str__(self):
-      return self.name
+      return "ROLE" + self.role

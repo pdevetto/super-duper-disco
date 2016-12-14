@@ -11,7 +11,7 @@ urlpatterns = [
     # Acces
     url(r'^movie/(?P<movie>[0-9]*)/$', views.find, name='movie'),
     url(r'^genre/(?P<genre>[0-9]*)/$', views.find, name='genre'),
-    url(r'^director/(?P<director>.*)/$', views.find, name='director'),
+    url(r'^people/(?P<people>.*)/$', views.find, name='people'),
     url(r'^year/(?P<year>.*)/$', views.find, name='year'),
 
 ]
