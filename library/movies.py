@@ -1,4 +1,4 @@
-import ConfigParser, requests, os, sys, re, json, Levenshtein, time
+import ConfigParser, requests, os, sys, re, json, Levenshtein, time, pprint
 
 class moviedbapi:
    def __init__(self):
@@ -119,22 +119,29 @@ class process:
          return None
       min_leven = 10000
       result_leven = None
+      results_leven = []
       coun = 0
       to = 0
       for bits, result in bitsdata:
          distance = Levenshtein.distance(bits.decode("utf-8"), result["title"])
          if distance == min_leven:
             coun += 1
+            results_leven.append( result )
          if distance < min_leven:
             min_leven = distance
             result_leven = result
+            results_leven = [result]
             coun = 0
             to = min_leven / len(bits)
-      print " " * 10 + "-- LEVENSHTEIN * " + str(coun) + " AT " + str(min_leven) + " : " + result_leven["title"].encode("utf-8")
-      if to <= tresh and coun == 0:
-         return result_leven
+      print " " * 10 + "-- LEVENSHTEIN * " + str(coun) + " AT " + str(min_leven) + " to: " + str(to) + " : " + result_leven["title"].encode("utf-8")
+      if coun == 0:
+         if to <= tresh:
+            return result_leven
+         else:
+            return None
       else:
-         return None
+         return {"possible":results_leven}
+
 
    def find(self, filenameext):
       log = ""
@@ -175,7 +182,10 @@ class process:
          log += btlog("bitsdata",  f, e)
          log += btlog("levendata",  g, f)
          if res != None:
-            return res, log
+            try:
+               return res["possible"], log
+            except:
+               return res, log
          else:
             return {"possible": data["results"]}, log
          #sys.exit()
@@ -203,18 +213,16 @@ class process:
                if len(resus) == 1:
                   return resus[0], log
          # levenshtein on results with half bits
-         a = time.time()
-         print databits
-         bitsdata = [(bits, result) for result in data["results"] for (bits, data) in databits.items()]
+         bitsdata = [(bits, result) for bits, data in databits.items() for result in data["results"] ]
+
          b = time.time()
-         print bitsdata
          res = self.levendata(bitsdata, tresh=0.3)
          c = time.time()
          log += btlog("2 leven ",  c, b)
          if res != None:
             return res, log
          else:
-            return {"possible": [result for bits, result in bitsdata]}, log
+            return {"possible": [result for (bits, result) in bitsdata]}, log
 
          # for bits, data in databits.items():
          #    bits = bits.strip()
@@ -267,26 +275,27 @@ class process:
 
 if __name__ == "__main__":
    files =  ["Dope (2015) 720p VOST by 4LT [MKV Corp].mkv",
-            "Ne.le.dis.a.personne.CD1.avi",
+            #"Ne.le.dis.a.personne.CD1.avi",
             #  "Fabien Onteniente 2009 Camping 2",
             #  "Love (2015) 720p VOST by Solon8 [MKV Corp].mkv",
-              "Zach.Braff_2004_Garden.state.mkv",
+            # "Zach.Braff_2004_Garden.state.mkv",
             #  "Mais.qui.a.re-tue.Pamela.Rose.avi",
             #  "Colombiana (2011) 720p VO-VF by 4LT [MKV Corp].mkv",
             #  "La Colline aux coquelicots.avi",
-              "Takeshi.Kitano_1989_Violent.Cop.mkv",
+            #  "Takeshi.Kitano_1989_Violent.Cop.mkv",
             #  "Bernard et Bianca au Pays dSes kangourous) (1990) 720p VO-VF by l'@rtiste [MKV Corp].mkv",
             #  "Blood Simple 1984 [Director's Cut].1984.DVDRip.XviD-VLiS.avi",
             #  "Dope (2015) 720p VOST by 4LT [MKV Corp].mkv"
             ]
    m = process()
    for i in files:
-       r = m.find(i)
+       r, log = m.find(i)
        if r is not None:
           try:
              a = r["possible"]
              print "**possibles**"
           except:
+             print r
              print "**saved**"
 
    #movieids = [292431, 12622, 308639, 62835, 401, 139374]

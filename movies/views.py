@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
-import hashlib, random, os, time
+import hashlib, random, os, time, json
 import utils
 from library import movies
 
@@ -174,9 +174,12 @@ def process(request):
          response["log"] += btlog("proc find", b, a)
          # Reponses multiples
          try:
+            possibles = []
             for result in dat["possible"]:
-               response["log"] += "<br>" + str(result)
-         except:
+               print result
+               possibles.append( {'poster_path':result['poster_path'], 'title':result['title'], 'year':result['release_date'],'tmdb_id':result['id']} )
+            Movie.objects.filter(pk=movie.id).update(possible=json.dumps(possibles))
+         except KeyError:
             # Reponse Simple
             try:
                year = int(dat['release_date'][0:4])
