@@ -80,6 +80,18 @@ a:hover, a:active, a:focus{
    font-size:0.8em;
    -webkit-filter:  opacity(90%);
 }
+
+/****************************
+ * Progress
+ *********************************/
+#collection{
+   background: rgba(250,250,250,0.2);
+}
+#collection .progress-bar{
+   background: #FFF;
+   color: black;
+}
+
 /***********************
  *  Movies
  ****************************/

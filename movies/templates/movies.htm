@@ -1,6 +1,7 @@
 {% extends 'base.htm' %}
 {% load static %}
 {% block content %}
+
    <div class="row">
        <div class="col-lg-12">
            <h1 class="page-header"><img src="{% static 'img/logo/mandle-white.svg' %}"/>Mandle 2
@@ -8,6 +9,14 @@
           </h1>
        </div>
    </div>
+
+   <div class="progress" id="collection">
+      <div id="collectionbar" class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%;min-width:2em;">
+      </div>
+    </div>
+    <div id="progresslabel" class="pull-right"></div>
+    <br>
+
 
    {% if findtype == "people" %}
       <h2> {{ people }} </h2>

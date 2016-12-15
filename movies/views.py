@@ -22,6 +22,14 @@ def index(request):
     context = {'movies_list': movies_list,}
     return render(request, 'movies.htm', context)
 
+def jsondata(request):
+   response = {}
+
+   response["total"] = Movie.objects.count()
+   response["todo"] = Movie.objects.filter(clean=0).count()
+
+   return JsonResponse(response)
+
 def isset(request):
    last = Movie.objects.exclude(year__isnull=True).count() - 1
    movies_list = []
@@ -50,6 +58,7 @@ def clear(request):
 ###########################
 # Process LIBS
 ###########################
+
 def processPeople(movie):
     ndata =0
     proc = movies.process()
@@ -73,21 +82,36 @@ def processPeople(movie):
           q.save()
           ndata += 1
     return ndata
+
 ###########################
 # Process
 ###########################
+
+def btlog(txt, a, b):
+   t = "<span style='border:1px solid black; padding:5px;'>"
+   uu = int( (a - b)*1000 ) / 1000.0
+   t += txt + str(uu) + "<br></span>"
+   return ""
+   #t
+
 def process(request):
+   formt = request.GET.get('format', 'html')
    start = time.time()
    response = {"log":"Processing merdiers", "nb":0}
    proc = movies.process()
    response["nb"] = 0
    movies_list = Movie.objects.filter(clean=0)
    for movie in movies_list:
-      if response["nb"] >= 2:
-          break
+      a = time.time()
+      if int(time.time() - start ) >= 5:
+         response["log"] += "<br>HTTP:" + str(proc.calls()) + "<hr> INTERUPTION :" + str( time.time() - start )
+         break
       #################
       # For each movies
-      response["log"] += "<hr>" + str(movie.tmdb_id) + " x " + str( time.time() - start )
+      response["log"] += "<br>HTTP:" + str(proc.calls()) + "<hr>" + str(movie.tmdb_id) + " x " + str( time.time() - start )
+      proc.zero()
+      b = time.time()
+      response["log"] += btlog("bullshit du debut", b, a)
       if movie.tmdb_id != None and movie.tmdb_id != 0:
          ##############################
          # That has no genres
@@ -95,6 +119,7 @@ def process(request):
          if movie.genres.count() == 0:
             response["log"] += "<br>" + movie.filename + "<br> -- genres:"
             dat = proc.genre(movie.tmdb_id)
+            c = time.time()
             for g in dat:
                 response["log"] += ": " + str(g)
                 if Genre.objects.filter(tmdb_id=g["id"]).count() == 0:
@@ -105,6 +130,7 @@ def process(request):
                     genre = Genre.objects.filter(tmdb_id=g["id"])[0]
                 ndata += 1
                 movie.genres.add(genre)
+            d = time.time()
             if ndata == 0:
                 if Genre.objects.filter(name="no").count() == 0:
                     genre = Genre(name="no", tmdb_id="0")
@@ -115,33 +141,55 @@ def process(request):
                     genre = Genre.objects.filter(name="no")[0]
                     movie.genres.add(genre)
                     ndata += 1
+            e = time.time()
+            response["log"] += btlog("proc.genre", c, b)
+            response["log"] += btlog("genre create if any", d, c)
+            response["log"] += btlog("genre add to movie", e, d)
             response["log"] += "<br>" + str(ndata) + " genre !"
          ######################
          # That has no roles
          if Role.objects.filter(movie=movie.id).count() == 0:
+            c = time.time()
             response["log"] += "<br>" + movie.filename + "<br> -- peoples:"
             ndata += processPeople(movie)
+            d = time.time()
+            response["log"] += btlog("processpeople", d, c)
             response["log"] += "<br>" + str(ndata) + " added !"
          ######################
          # Process OK
          if ndata != 0:
-             response["nb"] += 2
-             Movie.objects.filter(pk=movie.id).update(clean=1)
+            c = time.time()
+            response["nb"] += 2
+            Movie.objects.filter(pk=movie.id).update(clean=1)
+            d = time.time()
+            response["log"] += btlog("Movie filter update clean 0", d, c)
       ################################
       # That does not exist
-      else:
+      elif movie.possible is None:
+         a = time.time()
          response["log"] += "<br>" + movie.filename + "<br> -- basic:"
-         dat = proc.find(movie.filename)
-         #Movie.objects.filter(pk=movie.id)
+         dat, log = proc.find(movie.filename)
+         b = time.time()
+         response["log"] += log
+         response["log"] += btlog("proc find", b, a)
+         # Reponses multiples
          try:
-            year = int(dat['release_date'][0:4])
-         except :
-            year = 0
-         try:
-             Movie.objects.filter(pk=movie.id).update( poster=dat['poster_path'], title=dat['title'], year=year, tmdb_id=dat['id'])
-             response["nb"] += 1
-         except TypeError:
-             pass
+            for result in dat["possible"]:
+               response["log"] += "<br>" + str(result)
+         except:
+            # Reponse Simple
+            try:
+               year = int(dat['release_date'][0:4])
+            except :
+               year = 0
+            try:
+               Movie.objects.filter(pk=movie.id).update( poster=dat['poster_path'], title=dat['title'], year=year, tmdb_id=dat['id'])
+               c = time.time()
+               response["nb"] += 1
+               response["log"] += ">saved"
+               response["log"] += btlog("Movie update merdier", c, b)
+            except TypeError:
+                pass
 
       # Add 'genre_ids'
       # Add 'original_title'
@@ -151,8 +199,11 @@ def process(request):
 
    end = time.time()
    response["time"] = end - start
-   return JsonResponse(response)
-   #return HttpResponse(response["log"])
+   response["todo"] = Movie.objects.filter(clean=0).count()
+   if formt == "json":
+      return JsonResponse(response)
+   else:
+      return HttpResponse(response["log"])
 
 def update(request):
    start = time.time()

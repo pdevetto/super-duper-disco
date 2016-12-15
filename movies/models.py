@@ -46,7 +46,9 @@ class Movie(models.Model):
    poster     = models.CharField(max_length=200, null=True)
    year       = models.IntegerField(null=True)
    tmdb_id    = models.IntegerField(null=True)
+
    clean      = models.IntegerField(null=True, default=0)
+   possible   = models.TextField(null=True)
 
    genres     = models.ManyToManyField(Genre)
 

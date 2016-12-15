@@ -8,6 +8,7 @@ urlpatterns = [
     url(r'^update/', views.update, name='update'),
     url(r'^clear/', views.clear, name='clear'),
     url(r'^process/', views.process, name='process'),
+    url(r'^jsondata/', views.jsondata, name='jsondata'),
     # Acces
     url(r'^movie/(?P<movie>[0-9]*)/$', views.find, name='movie'),
     url(r'^genre/(?P<genre>[0-9]*)/$', views.find, name='genre'),
