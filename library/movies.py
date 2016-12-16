@@ -64,14 +64,6 @@ class meanwords:
       self.base[word] = value
       self.save()
 
-# Reading data back
-def btlog(txt, a, b):
-   t = "<br><span style='border:1px solid black; padding:5px;'>"
-   uu = int( (a - b)*1000 ) / 1000.0
-   t += txt + str(uu) + "<br></span>"
-   return ""
-   #return t
-
 class process:
    # ['vo', 'vostfr', 'dvdrip', 'brrip', '720p', '1080p', 'wawa', 'xvid', 'www']
 
@@ -144,104 +136,81 @@ class process:
 
 
    def find(self, filenameext):
-      log = ""
-      a = time.time()
       filename = self.clean(filenameext)
-      b = time.time()
       print " " * 4 + "-- " + filename.decode("utf-8")
       data = self.moviedb.call(filename)
-      c = time.time()
       year = self.gotyearintitle(filename)
-      d = time.time()
-      log += btlog("clean",  b, a)
-      log += btlog("movidb", c, b)
-      log += btlog("gotyear", d, c)
       # Got 1 result
       if data["total_results"] == 1:
          print " " * 8 + "-- 1 result"
-         return data["results"][0], log
+         return data["results"][0]
       # Got more results and got a date
       elif data["total_results"] >= 1 and year is not None:
-         d = time.time()
-         print " " * 8 + "-- * results - 1 year"
+         print " " * 8 + "#ProcFindA -- * results - 1 year"
          results = [result for result in data["results"] if result["release_date"][0:4] == year]
-         e = time.time()
-         log += btlog("comprehension",  e, d)
          if len(results) == 1:
-            return results[0], log
+            return results[0]
          else:
-            return {"possible":results}, log
+            return {"possible":results}
       # Des results mais pas de year
       elif data["total_results"] >= 1:
-         e = time.time()
-         print " " * 8 + "-- * results - no year"
+         print " " * 8 + "#ProcFindB-- * results - no year"
          bitsdata = [(filename, result) for result in data["results"]]
-         f = time.time()
          res = self.levendata(bitsdata, tresh=0.3)
-         g = time.time()
-         log += btlog("bitsdata",  f, e)
-         log += btlog("levendata",  g, f)
          if res != None:
             try:
-               return res["possible"], log
+               return res["possible"]
             except:
-               return res, log
+               return res
          else:
-            return {"possible": data["results"]}, log
+            return {"possible": data["results"]}
          #sys.exit()
       # 0 results but a year in the title
       elif year is not None:
-         print " " * 8 + "-- 0 result - year"
+         print " " * 8 + "#ProcFindC-- 0 result - year"
          filena = filename.split(year)
          databits = {}
          for bits in filena:
-            a = time.time()
             data = self.moviedb.call(bits)
-            b = time.time()
             databits[bits] = data
             print " " * 8 + ">- " + bits + " = " + str(data["total_results"]) + " results"
             # Got 1 result for petit title
-            c = time.time()
-            log += btlog("dbcall sous ",  b, a)
-            log += btlog("giberish",  c, b)
             if data["total_results"] == 1:
-               return data["results"][0], log
+               return data["results"][0]
             # got more results
             elif data["total_results"] >= 1:
                # Try if year break the results
                resus = [result for result in data["results"] if result["release_date"][0:4] == year]
                if len(resus) == 1:
-                  return resus[0], log
+                  return resus[0]
          # levenshtein on results with half bits
          bitsdata = [(bits, result) for bits, data in databits.items() for result in data["results"] ]
 
-         b = time.time()
          res = self.levendata(bitsdata, tresh=0.3)
-         c = time.time()
-         log += btlog("2 leven ",  c, b)
          if res != None:
-            return res, log
+            return res
          else:
-            return {"possible": [result for (bits, result) in bitsdata]}, log
-
-         # for bits, data in databits.items():
-         #    bits = bits.strip()
-         #    for result in data["results"]:
-         #       distance = Levenshtein.distance(bits.decode("utf-8"), result["title"])
-         #       if distance == min_leven:
-         #          coun += 1
-         #       if distance < min_leven:
-         #          min_leven = distance
-         #          result_leven = result
-         #          coun = 0
-         # print " " * 10 + "-- LEVENSHTEIN * " + str(coun) + " AT " + str(min_leven) + " len(bits) " + str(len(bits))
-         # if min_leven / len(bits) <= 0.3 and coun == 0:
-         #    return result_leven
-         # else:
-         #    return {"possible": [result for result in data["results"] for data in databits]}
+            return {"possible": [result for (bits, result) in bitsdata]}
       else:
-         print " " * 8 + "-- 0 result"
-         # Combinaison 2 words
+         print " " * 8 + "#ProcFindD-- 0 result - no year"
+         if filenameext != filename:
+            # Combinaison 2 words
+            newfilename = filename
+            for word in filename.split():
+               w = self.mean.get(word)
+               if w is not None:
+                  word_results = w
+               else:
+                  data = self.moviedb.call(word)
+                  self.mean.add(word, data["total_results"])
+                  word_results = data["total_results"]
+               print word + " = " + str(word_results)
+               if word_results == 0:
+                  newfilename = newfilename.replace(word, "")
+                  break
+            if newfilename != filename:
+               print "RETRY WITH : " + newfilename
+               return self.find(newfilename)
 
    def real(self, movie_id):
       #print "REAL" + str(movie_id)
@@ -275,7 +244,7 @@ class process:
 
 if __name__ == "__main__":
    files =  ["Dope (2015) 720p VOST by 4LT [MKV Corp].mkv",
-            #"Ne.le.dis.a.personne.CD1.avi",
+            "Ne.le.dis.a.personne.CD1.avi",
             #  "Fabien Onteniente 2009 Camping 2",
             #  "Love (2015) 720p VOST by Solon8 [MKV Corp].mkv",
             # "Zach.Braff_2004_Garden.state.mkv",
@@ -289,7 +258,7 @@ if __name__ == "__main__":
             ]
    m = process()
    for i in files:
-       r, log = m.find(i)
+       r = m.find(i)
        if r is not None:
           try:
              a = r["possible"]
