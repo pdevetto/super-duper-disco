@@ -1,0 +1,41 @@
+{% extends 'base.htm' %}
+{% load static %}
+{% block content %}
+
+   <div class="row">
+       <div class="col-lg-12">
+           <h1 class="page-header"><img src="{% static 'img/logo/mandle-white.svg' %}"/>Mandle 2
+          </h1>
+       </div>
+   </div>
+
+   {% if movies %}
+   <div class="row">
+      {% for movie in movies %}
+         <h3>{{ movie.filename }}</h3>
+         {% for possible in movie.possibles %}
+         <div class="possible" id="{{ possible.id }}">
+            <div>
+               <img src="https://image.tmdb.org/t/p/original/{{ possible.poster_path }}" alt="no" onerror="this.src = '{% static "img/logo/mandle-white.svg" %}';this.className += ' default'"><br>
+            </div>
+            <div>
+               <span class='title'>{{ possible.title }}</span>
+               <br><span>{{ possible.year }}</span>
+               {% if possible.original_title != possible.title %}
+                  <br><span>{{ possible.original_title }}</span>
+               {% endif %}
+               <a class="btn btn-default btn-xs" href="{% url 'possible' %}?movie={{movie.id}}&tmdb={{possible.tmdb_id}}" role="button">this</a>
+            </div>
+          </div>
+         {% endfor %}
+         <form action="{% url 'possible' %}" method="get">
+            <input type="text" name="search" placeholder="incentive" style="background:rgba(0,0,0,0.5);border-radius:20px;padding:5px 10px;">
+            <input type="hidden" name="movieid" value="{{movie.id}}">
+            <input type="submit" value="OK">
+         </form>
+       {% endfor %}
+   </div>
+   {% else %}
+       <p>No movies are available.</p>
+   {% endif %}
+{% endblock %}

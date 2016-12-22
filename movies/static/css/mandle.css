@@ -105,7 +105,6 @@ a:hover, a:active, a:focus{
 .movie .details{
     padding: 0 10px 10px 10px;
 }
-
 .poster img{
     width: 200px;
     height:284px;
@@ -126,4 +125,22 @@ a:hover, a:active, a:focus{
 }
 .movie .alldetails{
   width: 100%;
+}
+
+
+.possible{
+   display:inline-block;
+   border:1px solid white;
+   height: 150px;
+   margin: 20px;
+}
+.possible img{
+    width: 100px;
+    height: 142px;
+    -webkit-filter: brightness(90%) sepia(40%);
+}
+.possible div{
+   display:inline-block;
+   width: 100px;
+   max-width: 100px;
 }

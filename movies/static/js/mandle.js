@@ -56,6 +56,7 @@ mandle= {
                      mandle.data.total = dat["total"];
                      mandle.data.todo = dat["todo"];
                      mandle.moviebase.progress();
+                     document.getElementById("datapossible").innerHTML = "("+ dat["possible"] +")"
                   }
                }
             }
@@ -77,6 +78,8 @@ mandle= {
                   //mandle.notification.addNotif("1",text)
 
                   mandle.data.total = dat["total"];
+                  mandle.data.todo = dat["todo"];
+
                   if(dat["nb"] != 0){
                      mandle.moviebase.update()
                   }else{

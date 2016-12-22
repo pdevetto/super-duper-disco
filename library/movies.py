@@ -157,11 +157,9 @@ class process:
          print " " * 8 + "#ProcFindB-- * results - no year"
          bitsdata = [(filename, result) for result in data["results"]]
          res = self.levendata(bitsdata, tresh=0.3)
+         print res
          if res != None:
-            try:
-               return res["possible"]
-            except:
-               return res
+            return res
          else:
             return {"possible": data["results"]}
          #sys.exit()
@@ -196,6 +194,7 @@ class process:
          if filenameext != filename:
             # Combinaison 2 words
             newfilename = filename
+            words = []
             for word in filename.split():
                w = self.mean.get(word)
                if w is not None:
@@ -205,12 +204,24 @@ class process:
                   self.mean.add(word, data["total_results"])
                   word_results = data["total_results"]
                print word + " = " + str(word_results)
+               words.append( (word, word_results) )
                if word_results == 0:
                   newfilename = newfilename.replace(word, "")
                   break
             if newfilename != filename:
                print "RETRY WITH : " + newfilename
                return self.find(newfilename)
+            # derniere chance
+            interdits = ["mkv"]
+            def getKey(item):
+               return item[1]
+            nword = sorted(words, key=getKey)
+            searchword = nword[0][0]
+            n=0
+            while searchword in interdits:
+               n+=1
+               searchword = nword[n][0]
+            return self.find(searchword)
 
    def real(self, movie_id):
       #print "REAL" + str(movie_id)
@@ -243,8 +254,7 @@ class process:
       return peoples
 
 if __name__ == "__main__":
-   files =  ["Dope (2015) 720p VOST by 4LT [MKV Corp].mkv",
-            "Ne.le.dis.a.personne.CD1.avi",
+   files =  ["Deconstructing.the.Scene.720p.by.DietcH.[MKV.Corp].mkv",
             #  "Fabien Onteniente 2009 Camping 2",
             #  "Love (2015) 720p VOST by Solon8 [MKV Corp].mkv",
             # "Zach.Braff_2004_Garden.state.mkv",

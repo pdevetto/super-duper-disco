@@ -48,7 +48,8 @@ class Movie(models.Model):
    tmdb_id    = models.IntegerField(null=True)
 
    clean      = models.IntegerField(null=True, default=0)
-   possible   = models.TextField(null=True)
+   possible   = models.TextField(null=True, default=0)
+   search     = models.TextField(null=True, default=0)
 
    genres     = models.ManyToManyField(Genre)
 
