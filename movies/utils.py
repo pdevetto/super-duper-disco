@@ -5,7 +5,7 @@ def parse(path, n=0):
    for m_file in os.listdir(path):
       current = os.path.join(path, m_file)
       if not os.path.isfile(current):
-         print "is not file" + current.encode("utf-8")
+         #print "is not file" + current.encode("utf-8")
          for sample in parse(current, n+1):
             yield sample
       else:

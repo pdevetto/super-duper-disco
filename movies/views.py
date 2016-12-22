@@ -109,7 +109,7 @@ def process(request):
          break
       #################
       # For each movies
-      response["log"] += "<br>HTTP:" + str(proc.calls()) + "<hr>" + str(movie.filename) + " x " + str( time.time() - start )
+      response["log"] += "<br>HTTP:" + str(proc.calls()) + "<hr>" + str(movie.filename.encode("utf-8")) + " x " + str( time.time() - start )
       proc.zero()
       if movie.tmdb_id != None and movie.tmdb_id != 0:
          ##############################
@@ -200,6 +200,8 @@ def update(request):
    path = u"M:\Films"
    if not os.path.isdir(path):
       path = u"/media/data/Video/Movies/"
+   if not os.path.isdir(path):
+      path = u"/mnt/m/Films"
    for movie in utils.parse(path):
       if response["nb"] == 40:
          break

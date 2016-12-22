@@ -4,7 +4,7 @@ mandle= {
       processurl:"http://127.0.0.1:8000/process?format=json",
       jsonurl:"http://127.0.0.1:8000/jsondata",
       query:"",
-      total:0,todo:0
+      total:0,todo:0,action:"no"
    },
    init:function(){
       mandle.data.query = window.location.href.toString().split(window.location.host)[1];
@@ -40,7 +40,9 @@ mandle= {
          console.log(mandle.data.total + " et " + mandle.data.todo + " et " + perc)
          document.getElementById("collectionbar").style.width = perc +"%";
          document.getElementById("collectionbar").innerHTML = perc +"%";
-         document.getElementById("progresslabel").innerHTML = perc +"% ( " + (mandle.data.total - mandle.data.todo) + " / " + mandle.data.total + ")"
+         action = (mandle.data.action!="no")?'<span class="glyphicon glyphicon-refresh" ></span>  ' + mandle.data.action  + " )":'';
+         // aria-hidden="true"
+         document.getElementById("progresslabel").innerHTML = perc + " % ( " + (mandle.data.total - mandle.data.todo) + " / " + mandle.data.total + ")";
       },
       collection:function(){
          if(document.getElementById("collection")){
@@ -61,19 +63,20 @@ mandle= {
          }
       },
       update:function(){
+         mandle.data.action = "update";
+         mandle.moviebase.progress();
          var req = new XMLHttpRequest()
          req.open('GET', mandle.data.updateurl);
          req.onreadystatechange = function () {
             if (req.readyState === 4) {
+               mandle.data.action = "no";
                if (req.status === 200) {
                   dat = JSON.parse(req.responseText);
                   console.log(dat);
-                  text = "<strong>Update:</strong> " + dat["total"] + " movies <br> " + dat["nb"] + " movie added - " + (Math.round(dat["time"]*1000)/1000) + "s"
-                  mandle.notification.addNotif("1",text)
+                  //text = "<strong>Update:</strong> " + dat["total"] + " movies <br> " + dat["nb"] + " movie added - " + (Math.round(dat["time"]*1000)/1000) + "s"
+                  //mandle.notification.addNotif("1",text)
 
                   mandle.data.total = dat["total"];
-                  mandle.moviebase.progress();
-
                   if(dat["nb"] != 0){
                      mandle.moviebase.update()
                   }else{
@@ -84,11 +87,14 @@ mandle= {
                   mandle.notification.addNotif("4",text);
                   setTimeout(mandle.moviebase.update, 2000);
                }
+               mandle.moviebase.progress();
             }
          }
          req.send();
       },
       process:function(){
+         mandle.data.action = "process";
+         mandle.moviebase.progress();
          //text = "<strong>Process:</strong>"
          //mandle.notification.addNotif("2",text)
          var req = new XMLHttpRequest()
@@ -100,18 +106,15 @@ mandle= {
                   console.log(dat);
                   text = "<strong>Process:</strong><br>" + dat["nb"] + " movie processed - " + (Math.round(dat["time"]*1000)/1000) + "s"
                   mandle.notification.addNotif("1",text)
-
                   mandle.data.todo = dat["todo"];
-                  mandle.moviebase.progress();
-
                   if(dat["nb"] != 0){
                      mandle.moviebase.process()
                   }
                } else {
-                  text = "<strong>Process:</strong> Error"
-                  mandle.notification.addNotif("4",text)
-                  setTimeout(mandle.moviebase.process, 5000);
+                  text = "<strong>Process:</strong> Error - action stopped";
+                  mandle.notification.addNotif("4",text);
                }
+               mandle.moviebase.progress();
             }
          }
          req.send();
