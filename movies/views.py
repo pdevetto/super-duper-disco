@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
+from django.db.models import Q
 import hashlib, random, os, time, json
 import utils
 from library import movies
@@ -27,6 +28,7 @@ def jsondata(request):
 
    response["total"] = Movie.objects.count()
    response["todo"] = Movie.objects.filter(clean=0).count()
+   response["possible"] = Movie.objects.exclude(possible=0).count()
 
    return JsonResponse(response)
 
@@ -45,6 +47,37 @@ def isset(request):
    context = {'movies_list': movies_list,'total':last}
    return render(request, 'movies.htm', context)
 
+def possible(request):
+   movie = request.GET.get('movie', False)
+   possible = request.GET.get('tmdb', False)
+
+   movieid = request.GET.get('movieid', False)
+   search = request.GET.get('search', False)
+
+   if movie and possible:
+      elt = Movie.objects.get(pk=movie)
+      #return HttpResponse(len(elt.possible))
+      if json.loads(elt.possible) != 0:
+         eltposs = [elt_possible for elt_possible in json.loads(elt.possible) if elt_possible['tmdb_id']==int(possible)]
+         if len(eltposs) == 1:
+            dat = eltposs[0]
+            try:
+               year = int(dat['year'][0:4])
+            except :
+               year = 0
+            Movie.objects.filter(pk=elt.id).update(poster=dat['poster_path'], title=dat['title'], year=year, tmdb_id=dat['tmdb_id'], possible=0)
+   if movieid and search:
+      elt = Movie.objects.get(pk=movieid)
+      #return HttpResponse(json.loads(elt.possible) != 0)
+      if json.loads(elt.possible) != 0:
+         Movie.objects.filter(pk=elt.id).update(search=search, possible=0)
+   movies = Movie.objects.exclude(possible=0)
+   movies_list = []
+   for movie in movies:
+      movie.possibles = json.loads(movie.possible)
+      movies_list.append( movie )
+   context = {'movies': movies_list}
+   return render(request, 'possibles.htm', context)
 
 def clear(request):
    Movie.objects.filter().delete()
@@ -100,18 +133,20 @@ def process(request):
    response = {"log":"Processing merdiers", "nb":0}
    proc = movies.process()
    response["nb"] = 0
-   movies_list = Movie.objects.filter(clean=0)
+   movies_list = Movie.objects.filter(clean=0,possible=0)
    # process movie list
    for movie in movies_list:
       a = time.time()
-      if int(time.time() - start ) >= 5:
+      if int(time.time() - start ) >= 3:
          response["log"] += "<br>HTTP:" + str(proc.calls()) + "<hr> INTERUPTION :" + str( time.time() - start )
          break
       #################
       # For each movies
-      response["log"] += "<br>HTTP:" + str(proc.calls()) + "<hr>" + str(movie.filename) + " x " + str( time.time() - start )
+      response["log"] += "<br>HTTP:" + str(proc.calls()) + "<hr>" + str(movie.filename)
+      response["log"] += "<br><i>" + str( int((time.time() - start  )*1000) /1000.0 ) + "</i>"
       proc.zero()
       if movie.tmdb_id != None and movie.tmdb_id != 0:
+         response["log"] += "<br>***real actor"
          ##############################
          # That has no genres
          ndata = 0
@@ -119,7 +154,7 @@ def process(request):
             response["log"] += "<br> -- genres:"
             dat = proc.genre(movie.tmdb_id)
             for g in dat:
-                response["log"] += ": " + str(g)
+                #response["log"] += ": " + str(g)
                 if Genre.objects.filter(tmdb_id=g["id"]).count() == 0:
                     name = g["name"]
                     genre = Genre(name=name, tmdb_id=g["id"])
@@ -138,7 +173,7 @@ def process(request):
                     genre = Genre.objects.filter(name="no")[0]
                     movie.genres.add(genre)
                     ndata += 1
-            response["log"] += "<br>" + str(ndata) + " genre !"
+            response["log"] += "" + str(ndata) + " genre !"
          ######################
          # That has no roles
          if Role.objects.filter(movie=movie.id).count() == 0:
@@ -152,20 +187,20 @@ def process(request):
             Movie.objects.filter(pk=movie.id).update(clean=1)
       ################################
       # That does not exist
-      elif movie.possible is None:
-         response["log"] += "<br> -- basic:"
+      elif movie.possible != 0:
+         response["log"] += "<br>*** basic:"
          dat = proc.find(movie.filename)
          # Reponses multiples
-         print "*" * 150
-         print dat
          try:
             possibles = []
             for result in dat["possible"]:
-               print result
-               possibles.append( {'poster_path':result['poster_path'], 'title':result['title'], 'year':result['release_date'],'tmdb_id':result['id']} )
+               possibles.append( {'poster_path':result['poster_path'], 'title':result['title'],
+               'original_title':result['original_title'], 'year':result['release_date'],'tmdb_id':result['id']} )
             Movie.objects.filter(pk=movie.id).update(possible=json.dumps(possibles))
             response["log"] += ">possible "
             response["nb"] += 1
+         except TypeError:
+            return HttpResponse( movie.filename + "<br>" + str(dat) )
          except KeyError:
             # Reponse Simple
             try:
@@ -213,6 +248,7 @@ def update(request):
          q = Movie(titlehash=hust, filename=movie[1], filepath=movie[0])
          q.save()
    response["log"] = ""
+   response["todo"] = Movie.objects.filter(clean=0).count()
    end = time.time()
    response["time"] = end - start
    return JsonResponse(response)
