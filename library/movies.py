@@ -24,7 +24,6 @@ class moviedbapi:
       self.httpcalls += 1
       return r.json()
 
-
    def peoples(self, movie_id):
       url = "https://api.themoviedb.org/3/movie/" + str(movie_id) + "/credits"
       params = {'api_key':self.key, 'language' : 'fr'}
@@ -115,6 +114,10 @@ class process:
       coun = 0
       to = 0
       for bits, result in bitsdata:
+         try:
+             bits = bits.encode("utf-8")
+         except:
+             pass
          distance = Levenshtein.distance(bits.decode("utf-8"), result["title"])
          if distance == min_leven:
             coun += 1
@@ -137,7 +140,7 @@ class process:
 
    def find(self, filenameext):
       filename = self.clean(filenameext)
-      print " " * 4 + "-- " + filename.decode("utf-8")
+      print " " * 4 + "-- " + filename.encode("utf-8")
       data = self.moviedb.call(filename)
       year = self.gotyearintitle(filename)
       # Got 1 result
@@ -168,10 +171,17 @@ class process:
          print " " * 8 + "#ProcFindC-- 0 result - year"
          filena = filename.split(year)
          databits = {}
-         for bits in filena:
+         for bits in filena :
+            if bits.strip() == "":
+                continue
+            print " " * 10 + bits
             data = self.moviedb.call(bits)
             databits[bits] = data
-            print " " * 8 + ">- " + bits + " = " + str(data["total_results"]) + " results"
+            try:
+                print " " * 8 + ">- " + bits + " = " + str(data["total_results"]) + " results"
+            except KeyError:
+                pprint.pprint(data)
+                sys.exit()
             # Got 1 result for petit title
             if data["total_results"] == 1:
                return data["results"][0]
@@ -191,37 +201,41 @@ class process:
             return {"possible": [result for (bits, result) in bitsdata]}
       else:
          print " " * 8 + "#ProcFindD-- 0 result - no year"
-         if filenameext != filename:
+         #if filenameext != filename:
+         if len(filename.split()) > 1:
             # Combinaison 2 words
-            newfilename = filename
-            words = []
-            for word in filename.split():
-               w = self.mean.get(word)
-               if w is not None:
-                  word_results = w
-               else:
-                  data = self.moviedb.call(word)
-                  self.mean.add(word, data["total_results"])
-                  word_results = data["total_results"]
-               print word + " = " + str(word_results)
-               words.append( (word, word_results) )
-               if word_results == 0:
-                  newfilename = newfilename.replace(word, "")
-                  break
+            newfilename, words = self.splitwordmean(filename)
+            print " "* 12 + "RET" + newfilename + " and " + filename
             if newfilename != filename:
-               print "RETRY WITH : " + newfilename
+               print " "* 12 + "RETRY WITH : " + newfilename
                return self.find(newfilename)
             # derniere chance
-            interdits = ["mkv"]
-            def getKey(item):
-               return item[1]
-            nword = sorted(words, key=getKey)
-            searchword = nword[0][0]
-            n=0
-            while searchword in interdits:
-               n+=1
-               searchword = nword[n][0]
-            return self.find(searchword)
+            newfilename = newfilename.lower()
+            interdits = ["mkv", "vostfr", "by", "pour", "to", "fr", "en", "x264", "dvdrip"]
+            for word in newfilename.split():
+                if word in interdits:
+                   newfilename = newfilename.replace(word, "")
+            print " "* 12 + "LAST RETRY WITH : " + newfilename
+            if newfilename != filenameext:
+                return self.find(newfilename)
+            return 0
+
+   def splitwordmean(self, texte):
+       words = []
+       for word in texte.split():
+          w = self.mean.get(word)
+          if w is not None:
+             word_results = w
+          else:
+             data = self.moviedb.call(word)
+             self.mean.add(word, data["total_results"])
+             word_results = data["total_results"]
+          #print word + " = " + str(word_results)
+          words.append( (word, word_results) )
+          if word_results == 0:
+             texte = texte.replace(word, "")
+             break
+       return texte, words
 
    def real(self, movie_id):
       #print "REAL" + str(movie_id)

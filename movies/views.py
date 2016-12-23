@@ -129,20 +129,23 @@ def btlog(txt, a, b):
 
 def process(request):
    formt = request.GET.get('format', 'html')
+   delay = int(request.GET.get('delay', 4))
    start = time.time()
    response = {"log":"Processing merdiers", "nb":0}
    proc = movies.process()
    response["nb"] = 0
    movies_list = Movie.objects.filter(clean=0,possible=0)
+   countmovie = len(movies_list)
+   response["log"] += "<hr><hr>" + str(countmovie) + " movies to process"
    # process movie list
    for movie in movies_list:
       a = time.time()
-      if int(time.time() - start ) >= 3:
+      if int(time.time() - start ) >= delay:
          response["log"] += "<br>HTTP:" + str(proc.calls()) + "<hr> INTERUPTION :" + str( time.time() - start )
          break
       #################
       # For each movies
-      response["log"] += "<br>HTTP:" + str(proc.calls()) + "<hr>" + str(movie.filename)
+      response["log"] += "<br>HTTP:" + str(proc.calls()) + "<hr>" + movie.filename.encode("utf-8")
       response["log"] += "<br><i>" + str( int((time.time() - start  )*1000) /1000.0 ) + "</i>"
       proc.zero()
       if movie.tmdb_id != None and movie.tmdb_id != 0:
@@ -188,31 +191,43 @@ def process(request):
       ################################
       # That does not exist
       elif movie.possible != 0:
-         response["log"] += "<br>*** basic:"
-         dat = proc.find(movie.filename)
-         # Reponses multiples
-         try:
-            possibles = []
-            for result in dat["possible"]:
-               possibles.append( {'poster_path':result['poster_path'], 'title':result['title'],
-               'original_title':result['original_title'], 'year':result['release_date'],'tmdb_id':result['id']} )
-            Movie.objects.filter(pk=movie.id).update(possible=json.dumps(possibles))
+         ################################
+         # Specified search
+         if movie.search != 0:
+            response["log"] += "<br>*** manual:"
+            dat = proc.find(movie.search)
+         else:
+            response["log"] += "<br>*** basic:"
+            dat = proc.find(movie.filename)
+         if dat == 0 or dat == None:
+            Movie.objects.filter(pk=movie.id).update(possible=json.dumps([]))
             response["log"] += ">possible "
             response["nb"] += 1
-         except TypeError:
-            return HttpResponse( movie.filename + "<br>" + str(dat) )
-         except KeyError:
-            # Reponse Simple
-            try:
-               year = int(dat['release_date'][0:4])
-            except :
-               year = 0
-            try:
-               Movie.objects.filter(pk=movie.id).update( poster=dat['poster_path'], title=dat['title'], year=year, tmdb_id=dat['id'])
-               response["nb"] += 1
-               response["log"] += ">saved " + dat['title']
-            except TypeError:
-                pass
+         else:
+             # Reponses multiples
+             try:
+                possibles = []
+                for result in dat["possible"]:
+                   possibles.append( {'poster_path':result['poster_path'], 'title':result['title'],
+                   'original_title':result['original_title'], 'year':result['release_date'],'tmdb_id':result['id']} )
+                Movie.objects.filter(pk=movie.id).update(possible=json.dumps(possibles))
+                response["log"] += ">possible "
+                response["nb"] += 1
+             # Erreur
+             except TypeError:
+                return HttpResponse( str(dat) + "<br>" + movie.filename + "<br>" + str(dat) )
+             # Reponse Simple
+             except KeyError:
+                try:
+                   year = int(dat['release_date'][0:4])
+                except :
+                   year = 0
+                try:
+                   Movie.objects.filter(pk=movie.id).update( poster=dat['poster_path'], title=dat['title'], year=year, tmdb_id=dat['id'])
+                   response["nb"] += 1
+                   response["log"] += ">saved " + dat['title'].encode("utf-8")
+                except TypeError:
+                    pass
 
       # Add 'genre_ids'
       # Add 'original_title'

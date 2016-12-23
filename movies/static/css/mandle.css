@@ -6,7 +6,7 @@
 
 body {
     padding-top: 70px; /* Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of navigation changes. */
-    font-family: "Lucida Console", Monaco, monospace !important;
+    /*font-family: "Lucida Console", Monaco, monospace !important;*/
 }
 footer {
     margin: 50px 0;
@@ -97,7 +97,7 @@ a:hover, a:active, a:focus{
  ****************************/
 
  .movie{
-    max-width: 200px;
+    max-width: 160px;
     display: inline-block;
     vertical-align: top;
     word-wrap: break-word;
@@ -105,13 +105,19 @@ a:hover, a:active, a:focus{
 .movie .details{
     padding: 0 10px 10px 10px;
 }
+.movie .details .label{
+  font-weight: 300;
+  background: #fff;
+  color: #000;
+}
 .poster img{
-    width: 200px;
-    height:284px;
+    width: 160px;
+/*
     -webkit-filter: brightness(90%) sepia(40%);
+*/
 }
 .movie img.default{
-   padding: 70px;
+   padding: 50px;
    text-align: center;
    vertical-align: middle;
    border-radius: 20px;

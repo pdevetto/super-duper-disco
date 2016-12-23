@@ -13,6 +13,8 @@
    <div class="row">
       {% for movie in movies %}
          <h3>{{ movie.filename }}</h3>
+         <a href="file://M:/{{ movie.filepath|cut:'/mnt/m/' }}">
+           {{ movie.filepath|cut:'/mnt/m/' }} </a><br>
          {% for possible in movie.possibles %}
          <div class="possible" id="{{ possible.id }}">
             <div>

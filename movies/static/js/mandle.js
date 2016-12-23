@@ -1,7 +1,7 @@
 mandle= {
    data:{
       updateurl:"http://127.0.0.1:8000/update",
-      processurl:"http://127.0.0.1:8000/process?format=json",
+      processurl:"http://127.0.0.1:8000/process?format=json&delay=10",
       jsonurl:"http://127.0.0.1:8000/jsondata",
       query:"",
       total:0,todo:0,action:"no"
@@ -13,7 +13,7 @@ mandle= {
    },
    notification:{
       init:function(){
-         mandle.notification.addNotif("3","<strong>Holy guacamole!</strong> happy to see you !.")
+         mandle.notification.addNotif("3","<strong>Holy guacamole!</strong>")
       },
       addNotif:function(type, text){
          $("#notifs").slideDown();
@@ -40,9 +40,9 @@ mandle= {
          console.log(mandle.data.total + " et " + mandle.data.todo + " et " + perc)
          document.getElementById("collectionbar").style.width = perc +"%";
          document.getElementById("collectionbar").innerHTML = perc +"%";
-         action = (mandle.data.action!="no")?'<span class="glyphicon glyphicon-refresh" ></span>  ' + mandle.data.action  + " )":'';
+         action = (mandle.data.action!="no")?'   <span class="glyphicon glyphicon-refresh" ></span>  ' + mandle.data.action:'';
          // aria-hidden="true"
-         document.getElementById("progresslabel").innerHTML = perc + " % ( " + (mandle.data.total - mandle.data.todo) + " / " + mandle.data.total + ")";
+         document.getElementById("progresslabel").innerHTML = perc + " % ( " + (mandle.data.total - mandle.data.todo) + " / " + mandle.data.total + ")" + action;
       },
       collection:function(){
          if(document.getElementById("collection")){
@@ -76,7 +76,6 @@ mandle= {
                   console.log(dat);
                   //text = "<strong>Update:</strong> " + dat["total"] + " movies <br> " + dat["nb"] + " movie added - " + (Math.round(dat["time"]*1000)/1000) + "s"
                   //mandle.notification.addNotif("1",text)
-
                   mandle.data.total = dat["total"];
                   mandle.data.todo = dat["todo"];
 
@@ -104,6 +103,7 @@ mandle= {
          req.open('GET', mandle.data.processurl);
          req.onreadystatechange = function () {
             if (req.readyState === 4) {
+               mandle.data.action = "no";
                if (req.status === 200) {
                   dat = JSON.parse(req.responseText);
                   console.log(dat);
@@ -115,7 +115,9 @@ mandle= {
                   }
                } else {
                   text = "<strong>Process:</strong> Error - action stopped";
-                  mandle.notification.addNotif("4",text);
+                  //mandle.notification.addNotif("4",text);
+                  mandle.data.action = "(process error)";
+                  setTimeout(mandle.moviebase.process, 2000);
                }
                mandle.moviebase.progress();
             }
